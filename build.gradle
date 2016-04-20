@@ -10,7 +10,7 @@ buildscript {
     }
 }
 
-version = '2.6.0'
+version = '2.6.1-RIZE'
 //version = '2.5.1' // Last released version
 
 group = 'com.xebialabs.cloud'
@@ -100,7 +100,7 @@ allprojects {
         description = "Run the integration tests."
         group = 'Test'
         includes = ["**/*Itest.*"]
-        testResultsDir = project.file("${project.buildDir}/itest-results")
+//        testResultsDir = project.file("${project.buildDir}/itest-results")
     }
 
     project.tasks.getByName("test").configure {
@@ -128,86 +128,20 @@ signing {
 }
 
 uploadArchives {
-    if(project.hasProperty('sonatypeUsername')) {
-        repositories.mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
+    repositories {
+        mavenDeployer {
+            ext.nexusDeploymentUser = project.hasProperty('nexusDeploymentUser') ? project.property('nexusDeploymentUser') : null;
+            ext.nexusDeploymentPassword = project.hasProperty('nexusDeploymentPassword') ? project.property('nexusDeploymentPassword') : null;
 
-            configuration = configurations.archives
-
-            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            repository(url: 'https://nexus.gathering/nexus/content/repositories/releases') {
+                authentication(userName: ext.nexusDeploymentUser, password: ext.nexusDeploymentPassword)
             }
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            snapshotRepository(url: 'https://nexus.gathering/nexus/content/repositories/snapshots') {
+                authentication(userName: ext.nexusDeploymentUser, password: ext.nexusDeploymentPassword)
             }
-
-            pom.project {
-                name 'Cloudtest'
-                description 'A Java library to test against hosts in the cloud. '
-                packaging 'jar'
-                url 'https://github.com/xebialabs/overcast'
-                inceptionYear '2012'
-
-                scm {
-                    url 'https://github.com/xebialabs/overcast'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'vpartington'
-                        name 'Vincent Partington'
-                        url 'http://www.xebialabs.com/'
-                        email 'vpartington@xebialabs.com'
-                        roles {
-                            role 'Developer'
-                        }
-                    }
-                    developer {
-                        id 'hierynomus'
-                        name 'Jeroen van Erp'
-                        url 'http://www.xebialabs.com/'
-                        email 'jvanerp@xebialabs.com'
-                        roles {
-                            role 'Developer'
-                        }
-                    }
-                    developer {
-                        id 'mkotsur'
-                        name 'Mike Kotsur'
-                        url 'http://www.xebialabs.com/'
-                        email 'mkotsur@xebialabs.com'
-                        roles {
-                            role 'Developer'
-                        }
-                    }
-                    developer {
-                        id 'rklaren'
-                        name 'Ric Klaren'
-                        url 'http://www.xebialabs.com/'
-                        email 'rklaren@xebialabs.com'
-                        roles {
-                            role 'Developer'
-                        }
-                    }
-                    developer {
-                        id 'pvanderende'
-                        name 'Paul van der Ende'
-                        url 'http://www.xebialabs.com/'
-                        email 'pvanderende@xebialabs.com'
-                        roles {
-                            role 'Developer'
-                        }
-                    }
-                }
-            }
+            pom.version = project.version
+            pom.artifactId = project.name
+            pom.groupId = project.group
         }
     }
 }
